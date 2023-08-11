@@ -35,7 +35,7 @@ with st.sidebar:
 
     temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.1, step=0.01)
     top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.9, step=0.01)
-    max_length = st.sidebar.slider('max_length', min_value=64, max_value=4096, value=512, step=8)
+    # max_length = st.sidebar.slider('max_length', min_value=64, max_value=4096, value=512, step=8)
     
     st.markdown('📖 TODO: more infor how to use this prototype')
 
@@ -68,7 +68,7 @@ def generate_response(prompt_input):
         store = pickle.load(f)
 
     store.index = index
-    chain = VectorDBQAWithSourcesChain.from_llm(llm=OpenAI(temperature=0.2, top_p=top_p, max_length=max_length, openai_api_key=openai_api_key), vectorstore=store)
+    chain = VectorDBQAWithSourcesChain.from_llm(llm=OpenAI(temperature=0.2, top_p=top_p, openai_api_key=openai_api_key), vectorstore=store)
     result = chain({"question": prompt_input})
     output = result['answer']
     
