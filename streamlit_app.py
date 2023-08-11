@@ -75,8 +75,7 @@ def generate_response(prompt_input):
 
     store.index = index
 
-    print(f"api: {openai_api}")
-    chain = VectorDBQAWithSourcesChain.from_llm(llm=OpenAI(temperature=0.2, top_p=top_p, openai_api_key=openai_api), vectorstore=store)
+    chain = VectorDBQAWithSourcesChain.from_llm(llm=OpenAI(temperature=0.2, top_p=top_p), vectorstore=store)
     result = chain({"question": prompt_input})
     output = result['answer']
     
