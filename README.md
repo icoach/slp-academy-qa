@@ -1,21 +1,8 @@
-# 📦 Streamlit App Starter Kit 
-```
-⬆️ (Replace above with your app's name)
-```
+# 📦 Solidpixels Academy QA application 
 
-Description of the app ...
+The goal of this experiments is to create chat interface for [academy.solidpixels.com](https://academy.solidpixels.com/) to give customers way to ask questions about solidpixels and get relevant answers.
 
 ## Demo App
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://starter-kit.streamlitapp.com/)
+[![Streamlit app](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://solid-academy.streamlit.app/)
 
-## Section Heading
-
-This is filler text, please replace this with text for this section.
-
-## Further Reading
-
-This is filler text, please replace this with a explanatory text about further relevant resources for this repo
-- Resource 1
-- Resource 2
-- Resource 3
