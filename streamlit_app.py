@@ -50,7 +50,7 @@ for message in st.session_state.messages:
 
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": "Jak ti můžu dneska pomoct?"}]
-st.sidebar.button('VYmazat historii chatu', on_click=clear_chat_history)
+st.sidebar.button('Vymazat historii chatu', on_click=clear_chat_history)
 
 # Function for generating LLM response
 def generate_response(prompt_input):
