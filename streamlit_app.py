@@ -27,9 +27,9 @@ st.set_page_config(page_title="Akademický chatbot")
 with st.sidebar:
     st.title("Akademický chatbot")
 
-    if 'OPENAI_API_KEY' in st.secrets:
+    if 'OPENAI_API_KEY_v2' in st.secrets:
         st.success('API key already provided!', icon='✅')
-        openai_api_key = st.secrets['OPENAI_API_KEY']
+        openai_api_key = st.secrets['OPENAI_API_KEY_v2']
     else:
         st.warning('OpenAI key is not provided in the app settings!', icon='👉')
 
