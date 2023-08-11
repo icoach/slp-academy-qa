@@ -19,7 +19,7 @@ def generate_response(openai_api_key, query_text):
         store = pickle.load(f)
 
     store.index = index
-    chain = VectorDBQAWithSourcesChain.from_llm(llm=OpenAI(temperature=0.2), vectorstore=store)
+    chain = VectorDBQAWithSourcesChain.from_llm(llm=OpenAI(temperature=0.2, openai_api_key=openai_api_key), vectorstore=store)
     result = chain({"question": query_text})
     # print(f"{result['answer']}")
     # print()
@@ -41,8 +41,8 @@ def generate_response(openai_api_key, query_text):
 
 
 # Page title
-st.set_page_config(page_title='Solidpixels Academie')
-st.title('Solidpixels Academie')
+st.set_page_config(page_title='Solidpixels Akademie')
+st.title('Solidpixels Akademie')
 
 # Query text
 query_text = st.text_input('Zeptejte se akademie solidpixels:', placeholder = 'Zadejte váš dotaz')
