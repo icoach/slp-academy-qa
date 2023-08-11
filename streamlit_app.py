@@ -1,7 +1,7 @@
 import streamlit as st
 from langchain.llms import OpenAI
 from langchain.chains import VectorDBQAWithSourcesChain
-
+import os
 import faiss
 import pickle
 
@@ -28,16 +28,22 @@ with st.sidebar:
     st.title("Akademický chatbot")
 
     if 'OPENAI_API_KEY_v2' in st.secrets:
-        st.success('API key already provided!', icon='✅')
-        openai_api_key = st.secrets['OPENAI_API_KEY_v2']
+        st.success('API klíč je v pořádku', icon='✅')
+        openai_api = st.secrets['OPENAI_API_KEY_v2']
     else:
-        st.warning('OpenAI key is not provided in the app settings!', icon='👉')
+        openai_api = st.text_input('Zadej OpenAI API klíč:', type='password')
+        if not (openai_api.startswith('sk')):
+            st.warning('Prosím zadej API klíč pro velký mozek', icon='👉')
+        else:
+            st.warning('Jdi do toho, ptej se', icon='👉')
 
     temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=1.0, value=0.2, step=0.01)
     top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
     # max_length = st.sidebar.slider('max_length', min_value=64, max_value=4096, value=512, step=8)
     
     st.markdown('📖 TODO: more infor how to use this prototype')
+
+os.environ['OPENAI_API_KEY_v2'] = openai_api
 
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
@@ -68,14 +74,16 @@ def generate_response(prompt_input):
         store = pickle.load(f)
 
     store.index = index
-    chain = VectorDBQAWithSourcesChain.from_llm(llm=OpenAI(temperature=0.2, top_p=top_p, openai_api_key=openai_api_key), vectorstore=store)
+
+    print(f"api: {openai_api}")
+    chain = VectorDBQAWithSourcesChain.from_llm(llm=OpenAI(temperature=0.2, top_p=top_p, openai_api_key=openai_api), vectorstore=store)
     result = chain({"question": prompt_input})
     output = result['answer']
     
     return output
 
 # User-provided prompt
-if prompt := st.chat_input(disabled=not openai_api_key):
+if prompt := st.chat_input(disabled=not openai_api):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
