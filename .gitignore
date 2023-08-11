@@ -212,4 +212,6 @@ ENV/
 data/*.md
 data-sample/*.md
 
+ingest.py
+scrape.py
 # End of https://www.gitignore.io/api/macos,linux,django,python,pycharm
