@@ -27,9 +27,9 @@ st.set_page_config(page_title="Akademický chatbot")
 with st.sidebar:
     st.title("Akademický chatbot")
 
-    if 'OPENAI_API_KEY_v2' in st.secrets:
+    if 'OPENAI_API_KEY' in st.secrets:
         st.success('API klíč je v pořádku', icon='✅')
-        openai_api = st.secrets['OPENAI_API_KEY_v2']
+        openai_api = st.secrets['OPENAI_API_KEY']
     else:
         openai_api = st.text_input('Zadej OpenAI API klíč:', type='password')
         if not (openai_api.startswith('sk')):
@@ -43,7 +43,7 @@ with st.sidebar:
     
     st.markdown('📖 TODO: more infor how to use this prototype')
 
-os.environ['OPENAI_API_KEY_v2'] = openai_api
+os.environ['OPENAI_API_KEY'] = openai_api
 
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
