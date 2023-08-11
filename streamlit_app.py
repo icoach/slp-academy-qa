@@ -6,7 +6,7 @@ from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain.chains import VectorDBQAWithSourcesChain
 
-import faiss
+import faiss-cpu
 import pickle
 
 
