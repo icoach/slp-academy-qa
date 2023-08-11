@@ -4,4 +4,3 @@ openai
 chromadb
 tiktoken
 faiss-cpu
-pickle
