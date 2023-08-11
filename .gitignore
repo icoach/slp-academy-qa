@@ -209,6 +209,7 @@ ENV/
 .ropeproject
 
 # mkdocs documentation
-/site
+data/*.md
+data-sample/*.md
 
 # End of https://www.gitignore.io/api/macos,linux,django,python,pycharm
