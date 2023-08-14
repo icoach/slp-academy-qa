@@ -1,9 +1,11 @@
 import streamlit as st
-from langchain.llms import OpenAI
-from langchain.chains import VectorDBQAWithSourcesChain
 import os
 import faiss
 import pickle
+
+from langchain.llms import OpenAI
+from langchain.chains import RetrievalQA
+from langchain.chat_models import ChatOpenAI
 
 
 # # Split documents into chunks
@@ -75,11 +77,13 @@ def generate_response(prompt_input):
 
     store.index = index
 
-    chain = VectorDBQAWithSourcesChain.from_llm(llm=OpenAI(temperature=0.2, top_p=top_p), vectorstore=store)
-    result = chain({"question": prompt_input})
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, top_p=top_p)
+    chain = RetrievalQA.from_chain_type(llm,retriever=vectorstore.as_retriever(), verbose=True)
+    o = chain({"query": prompt_input})
+
     output = []
-    output.append(result['answer'])
-    output.append(result['sources'])
+    output.append(o['result'])
+    # output.append(o['sources'])
     
     return output
 
