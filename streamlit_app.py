@@ -105,7 +105,7 @@ def generate_response(prompt_input):
 
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature)
     chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type="stuff", return_source_documents=True, verbose=True)
-    o = chain({"query": prompt_input})
+    o = chain({"question": prompt_input})
 
     output = []
     output.append(o['answer'] + o['sources'])
