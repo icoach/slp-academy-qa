@@ -4,9 +4,15 @@ import faiss
 import pickle
 
 from langchain.llms import OpenAI
-from langchain.chains import RetrievalQA
+from langchain.chains import RetrievalQAWithSourcesChain
+# from langchain.chains import ConversationalRetrievalQAChain
 from langchain.chat_models import ChatOpenAI
+# from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+# from langchain.memory import ConversationBufferMemory
+# from langchain.callbacks.base import BaseCallbackHandler
+# from langchain.schema import HumanMessage
 
+# memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 # # Split documents into chunks
 # text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -21,6 +27,26 @@ from langchain.chat_models import ChatOpenAI
 # qa = RetrievalQA.from_chain_type(llm=OpenAI(openai_api_key=openai_api_key), chain_type='stuff', retriever=retriever)
 # return qa.run(query_text)
 
+# class StreamHandler(BaseCallbackHandler):
+#     def __init__(self, container, initial_text="", display_method='markdown'):
+#         self.container = container
+#         self.text = initial_text
+#         self.display_method = display_method
+
+#     def on_llm_new_token(self, token: str, **kwargs) -> None:
+#         self.text += token + "/"
+#         display_function = getattr(self.container, self.display_method, None)
+#         if display_function is not None:
+#             display_function(self.text)
+#         else:
+#             raise ValueError(f"Invalid display_method: {self.display_method}")
+
+
+# def get_chat_history(inputs) -> str:
+#     res = []
+#     for human, ai in inputs:
+#         res.append(f"Human:{human}\nAI:{ai}")
+#     return "\n".join(res)
 
 # App title
 st.set_page_config(page_title="Akademický chatbot")
@@ -77,8 +103,8 @@ def generate_response(prompt_input):
 
     store.index = index
 
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, streaming=True)
-    chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, streaming=True, callbacks=[StreamingStdOutCallbackHandler()])
+    chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type="stuff", return_source_documents=True, verbose=True)
     o = chain({"query": prompt_input})
 
     output = []
@@ -97,9 +123,20 @@ if prompt := st.chat_input(disabled=not openai_api):
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner("Pracuju na tom..."):
-            response = generate_response(prompt)
             placeholder = st.empty()
+            # stream_handler = StreamHandler(placeholder, display_method='write')
             full_response = ''
+            response = generate_response(prompt)
+
+            # llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, streaming=True)
+            # question_generator = LLMChain(llm=llm, prompt=prompt_input)
+            # chain = ConversationalRetrievalChain.from_llm(llm,retriever=store.as_retriever(), callbacks=[stream_handler], question_generator=question_generator, memory=memory, verbose=True)
+            chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
+            result = chain({"query": prompt_input})
+
+            output = []
+            output.append(o['result'])
+            
             for item in response:
                 full_response += item
                 placeholder.markdown(full_response)
