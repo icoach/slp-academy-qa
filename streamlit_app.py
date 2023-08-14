@@ -103,13 +103,12 @@ def generate_response(prompt_input):
 
     store.index = index
 
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, streaming=True, callbacks=[StreamingStdOutCallbackHandler()])
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature)
     chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type="stuff", return_source_documents=True, verbose=True)
     o = chain({"query": prompt_input})
 
     output = []
-    output.append(o['result'])
-    # output.append(o['sources'])
+    output.append(o['answer'] + o['sources'])
     
     return output
 
@@ -131,11 +130,6 @@ if st.session_state.messages[-1]["role"] != "assistant":
             # llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, streaming=True)
             # question_generator = LLMChain(llm=llm, prompt=prompt_input)
             # chain = ConversationalRetrievalChain.from_llm(llm,retriever=store.as_retriever(), callbacks=[stream_handler], question_generator=question_generator, memory=memory, verbose=True)
-            chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
-            result = chain({"query": prompt_input})
-
-            output = []
-            output.append(o['result'])
             
             for item in response:
                 full_response += item
