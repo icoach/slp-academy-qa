@@ -40,7 +40,7 @@ with st.sidebar:
             st.warning('Jdi do toho, ptej se', icon='👉')
 
     temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=1.0, value=0.2, step=0.01)
-    top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
+    # top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
     # max_length = st.sidebar.slider('max_length', min_value=64, max_value=4096, value=512, step=8)
     
     st.markdown('📖 TODO: more infor how to use this prototype')
@@ -77,7 +77,7 @@ def generate_response(prompt_input):
 
     store.index = index
 
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, top_p=top_p)
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, streaming=True)
     chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
     o = chain({"query": prompt_input})
 
