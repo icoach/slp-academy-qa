@@ -78,7 +78,7 @@ def generate_response(prompt_input):
     store.index = index
 
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, top_p=top_p)
-    chain = RetrievalQA.from_chain_type(llm,retriever=vectorstore.as_retriever(), verbose=True)
+    chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
     o = chain({"query": prompt_input})
 
     output = []
