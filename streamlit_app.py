@@ -5,6 +5,7 @@ import pickle
 
 from langchain.llms import OpenAI
 from langchain.chains import RetrievalQAWithSourcesChain
+from langchain.chains import RetrievalQA
 # from langchain.chains import ConversationalRetrievalQAChain
 from langchain.chat_models import ChatOpenAI
 # from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -66,9 +67,13 @@ with st.sidebar:
             st.warning('Jdi do toho, ptej se', icon='👉')
 
     temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=1.0, value=0.2, step=0.01)
-    # top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
-    # max_length = st.sidebar.slider('max_length', min_value=64, max_value=4096, value=512, step=8)
-    
+    max_tokens = st.sidebar.slider('max_tokens', min_value=0.01, max_value=1.0, value=0.2, step=0.01)
+    presence_penalty = st.sidebar.slider('max_tokens', min_value=0.0, max_value=1.0, value=0.0, step=0.1)
+
+    strategy = st.radio(
+    "Jakou použít strategii pro vyhledání obsahu",
+    ('RetrievalQAWithSourcesChain', 'RetrievalQA', 'Documentary'))
+
     st.markdown('📖 TODO: more infor how to use this prototype')
 
 os.environ['OPENAI_API_KEY'] = openai_api
@@ -103,9 +108,14 @@ def generate_response(prompt_input):
 
     store.index = index
 
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature)
-    chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type="stuff", return_source_documents=True, verbose=True)
-    o = chain({"question": prompt_input})
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, max_tokens=max_tokens, model_kwargs={"presencePenalty": presence_penalty})
+    
+    if strategy == "RetrievalQA":
+        chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever()}
+        o = chain({"query": prompt_input})
+    else:
+        chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type="stuff", return_source_documents=True, verbose=True)
+        o = chain({"question": prompt_input})
 
     output = []
     output.append(o['answer'] + o['sources'])
