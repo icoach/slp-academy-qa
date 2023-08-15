@@ -33,6 +33,7 @@ with st.sidebar:
     presence_penalty = st.sidebar.slider('presence_penalty', min_value=0.0, max_value=1.0, value=0.0, step=0.1)
 
     strategy = st.radio("Jakou použít strategii pro vyhledání obsahu", ('RetrievalQAWithSourcesChain', 'RetrievalQA', 'ConversationalRetrievalChain'))
+    indexMethod = st.radio("Advanced: Metoda pro volání LLM", ('Stuffing', 'Map-Rerank', 'Map-Reduce', 'Refine'))
 
     st.markdown('📖 TODO: more infor how to use this prototype')
 
@@ -53,7 +54,7 @@ st.sidebar.button('Vymazat historii chatu', on_click=clear_chat_history)
 
 # Function for generating LLM response
 def generate_response(prompt_input):
-    string_dialogue = "Jsi pracovník podpory pro webovou aplikaci a tvým úkolem je odpovídat na dotazy uživatelů aplikace. Neodpovídáš jako 'Uživatel' ani se nesnažíš předstírat, že jsi 'Uživatel'. Pouze odpovídáš jednou odpovědí jako 'Asistent'. Odpovídej pouze v češtině."
+    string_dialogue = "Jsi pracovník podpory pro webovou aplikaci a tvým úkolem je odpovídat na dotazy v ```. Odpovídej pouze v češtině."
     for dict_message in st.session_state.messages:
         if dict_message["role"] == "user":
             string_dialogue += "Uživatel: " + dict_message["content"] + "\n\n"
@@ -72,19 +73,28 @@ def generate_response(prompt_input):
     
     output = []
 
+    if indexMethod == "Stuffing":
+        chain_type="stuff"
+    elif indexMethod == "Map-Reduce":
+        chain_type="map_reduce"
+    elif indexMethod == "Map-Rerank":
+        chain_type="map_rerank"
+    elif indexMethod == "Refine":
+        chain_type="refine"
+
     if strategy == "RetrievalQA":
-        chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
-        o = chain({"query": prompt_input})
+        chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), chain_type=chain_type, verbose=True)
+        o = chain({"query": string_dialogue + "```" + prompt_input + "```"})
         output.append(o['result'])
 
     elif strategy == "ConversationalRetrievalChain":
-        chain = ConversationalRetrievalChain.from_llm(llm,retriever=store.as_retriever(), memory=memory, verbose=True)
-        o = chain({"question": "What are some of the main ideas in self-reflection?"})
+        chain = ConversationalRetrievalChain.from_llm(llm,retriever=store.as_retriever(), chain_type=chain_type, memory=memory, verbose=True)
+        o = chain({"question": string_dialogue + "```" + prompt_input + "```"})
         output.append(o['answer'])
 
     else:
-        chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type="stuff", verbose=True)
-        o = chain({"question": prompt_input})
+        chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type=chain_type, verbose=True)
+        o = chain({"question": string_dialogue + "```" + prompt_input + "```"})
         output.append(o['answer'] + o['sources'])
     
     return output
@@ -100,7 +110,6 @@ if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner("Pracuju na tom..."):
             placeholder = st.empty()
-            # stream_handler = StreamHandler(placeholder, display_method='write')
             full_response = ''
             response = generate_response(prompt)
 
