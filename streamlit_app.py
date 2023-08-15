@@ -53,14 +53,7 @@ def clear_chat_history():
 st.sidebar.button('Vymazat historii chatu', on_click=clear_chat_history)
 
 # Function for generating LLM response
-def generate_response(prompt_input):
-    string_dialogue = "Jsi pracovník podpory pro webovou aplikaci a tvým úkolem je odpovídat na dotazy v ```. Odpovídej pouze v češtině."
-    for dict_message in st.session_state.messages:
-        if dict_message["role"] == "user":
-            string_dialogue += "Uživatel: " + dict_message["content"] + "\n\n"
-        else:
-            string_dialogue += "Asistent: " + dict_message["content"] + "\n\n"
-    
+def generate_response(prompt_input):    
     # Load the LangChain.
     index = faiss.read_index("docs.index")
 
@@ -83,18 +76,18 @@ def generate_response(prompt_input):
         chain_type="refine"
 
     if strategy == "RetrievalQA":
-        chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), chain_type=chain_type, verbose=True)
-        o = chain({"query": string_dialogue + "```" + prompt_input + "```"})
+        chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
+        o = chain({"query": prompt_input})
         output.append(o['result'])
 
     elif strategy == "ConversationalRetrievalChain":
         chain = ConversationalRetrievalChain.from_llm(llm,retriever=store.as_retriever(), chain_type=chain_type, memory=memory, verbose=True)
-        o = chain({"question": string_dialogue + "```" + prompt_input + "```"})
+        o = chain({"question": prompt_input})
         output.append(o['answer'])
 
     else:
         chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type=chain_type, verbose=True)
-        o = chain({"question": string_dialogue + "```" + prompt_input + "```"})
+        o = chain({"question": prompt_input})
         output.append(o['answer'] + o['sources'])
     
     return output
