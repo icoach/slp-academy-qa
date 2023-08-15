@@ -108,15 +108,16 @@ def generate_response(prompt_input):
 
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, max_tokens=max_tokens, model_kwargs={"presence_penalty": presence_penalty})
     
+    output = []
+
     if strategy == "RetrievalQA":
         chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
         o = chain({"query": prompt_input})
+        output.append(o['result'] + o['sources'])
     else:
         chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type="stuff", return_source_documents=True, verbose=True)
         o = chain({"question": prompt_input})
-
-    output = []
-    output.append(o['answer'] + o['sources'])
+        output.append(o['answer'] + o['sources'])
     
     return output
 
