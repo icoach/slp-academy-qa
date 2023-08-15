@@ -3,51 +3,14 @@ import os
 import faiss
 import pickle
 
-from langchain.llms import OpenAI
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.chains import RetrievalQA
-# from langchain.chains import ConversationalRetrievalQAChain
 from langchain.chat_models import ChatOpenAI
-# from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-# from langchain.memory import ConversationBufferMemory
-# from langchain.callbacks.base import BaseCallbackHandler
-# from langchain.schema import HumanMessage
 
-# memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
 
-# # Split documents into chunks
-# text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-# texts = text_splitter.create_documents(documents)
-# # Select embeddings
-# embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-# # Create a vectorstore from documents
-# db = Chroma.from_documents(texts, embeddings)
-# # Create retriever interface
-# retriever = db.as_retriever()
-# # Create QA chain
-# qa = RetrievalQA.from_chain_type(llm=OpenAI(openai_api_key=openai_api_key), chain_type='stuff', retriever=retriever)
-# return qa.run(query_text)
-
-# class StreamHandler(BaseCallbackHandler):
-#     def __init__(self, container, initial_text="", display_method='markdown'):
-#         self.container = container
-#         self.text = initial_text
-#         self.display_method = display_method
-
-#     def on_llm_new_token(self, token: str, **kwargs) -> None:
-#         self.text += token + "/"
-#         display_function = getattr(self.container, self.display_method, None)
-#         if display_function is not None:
-#             display_function(self.text)
-#         else:
-#             raise ValueError(f"Invalid display_method: {self.display_method}")
-
-
-# def get_chat_history(inputs) -> str:
-#     res = []
-#     for human, ai in inputs:
-#         res.append(f"Human:{human}\nAI:{ai}")
-#     return "\n".join(res)
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 # App title
 st.set_page_config(page_title="Akademický chatbot")
@@ -69,7 +32,7 @@ with st.sidebar:
     temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=1.0, value=0.2, step=0.01)
     presence_penalty = st.sidebar.slider('presence_penalty', min_value=0.0, max_value=1.0, value=0.0, step=0.1)
 
-    strategy = st.radio("Jakou použít strategii pro vyhledání obsahu", ('RetrievalQAWithSourcesChain', 'RetrievalQA'))
+    strategy = st.radio("Jakou použít strategii pro vyhledání obsahu", ('RetrievalQAWithSourcesChain', 'RetrievalQA', 'ConversationalRetrievalChain'))
 
     st.markdown('📖 TODO: more infor how to use this prototype')
 
@@ -113,6 +76,12 @@ def generate_response(prompt_input):
         chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
         o = chain({"query": prompt_input})
         output.append(o['result'])
+
+    elif strategy == "ConversationalRetrievalChain":
+        chain = ConversationalRetrievalChain.from_llm(llm,retriever=store.as_retriever(), memory=memory, verbose=True)
+        o = chain({"question": "What are some of the main ideas in self-reflection?"})
+        output.append(o['answer'])
+
     else:
         chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type="stuff", verbose=True)
         o = chain({"question": prompt_input})
@@ -135,10 +104,6 @@ if st.session_state.messages[-1]["role"] != "assistant":
             full_response = ''
             response = generate_response(prompt)
 
-            # llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, streaming=True)
-            # question_generator = LLMChain(llm=llm, prompt=prompt_input)
-            # chain = ConversationalRetrievalChain.from_llm(llm,retriever=store.as_retriever(), callbacks=[stream_handler], question_generator=question_generator, memory=memory, verbose=True)
-            
             for item in response:
                 full_response += item
                 placeholder.markdown(full_response)
