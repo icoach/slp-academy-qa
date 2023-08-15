@@ -90,7 +90,7 @@ st.sidebar.button('Vymazat historii chatu', on_click=clear_chat_history)
 
 # Function for generating LLM response
 def generate_response(prompt_input):
-    string_dialogue = "Jsi nápomocný pracovník podpory pro webovou aplikaci. Neodpovídáš jako 'Uživatel' ani se nesnažíš předstírat, že jsi 'Uživatel'. Pouze odpovídáš jednou odpovědí jako 'Asistent'."
+    string_dialogue = "Jsi pracovník podpory pro webovou aplikaci a tvým úkolem je odpovídat na dotazy uživatelů aplikace. Neodpovídáš jako 'Uživatel' ani se nesnažíš předstírat, že jsi 'Uživatel'. Pouze odpovídáš jednou odpovědí jako 'Asistent'. Detekuj jazyk otázky 'Uživatele' a odpovídej mu ve stejném jazyce."
     for dict_message in st.session_state.messages:
         if dict_message["role"] == "user":
             string_dialogue += "Uživatel: " + dict_message["content"] + "\n\n"
