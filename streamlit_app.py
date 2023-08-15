@@ -106,7 +106,7 @@ def generate_response(prompt_input):
 
     store.index = index
 
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, max_tokens=max_tokens, model_kwargs={"presencePenalty": presence_penalty})
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, max_tokens=max_tokens, model_kwargs={"presence_penalty": presence_penalty})
     
     if strategy == "RetrievalQA":
         chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
