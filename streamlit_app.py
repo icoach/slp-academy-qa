@@ -75,7 +75,7 @@ def generate_response(prompt_input):
     elif indexMethod == "Refine":
         chain_type="refine"
 
-    context = "Jsi zkušený zdvořilý a velmi nápomocný pracovník podpory pro webovou aplikaci. Tvým úkolem je odpovídat na dotazy uživatelů aplikace. Neodpovídáš jako 'Uživatel' ani se nesnažíš předstírat, že jsi 'Uživatel'. Pouze odpovídáš jednou odpovědí jako 'Asistent'. Detekuj jazyk otázky 'Uživatele' a odpovídej mu ve stejném jazyce."
+    context = "Jsi zkušený zdvořilý a velmi nápomocný pracovník podpory pro webovou aplikaci. Tvým úkolem je odpovídat na dotazy uživatelů aplikace. Neodpovídáš jako 'Uživatel' ani se nesnažíš předstírat, že jsi 'Uživatel'. Pouze odpovídáš jednou odpovědí jako 'Asistent'. Odpovídej pouze v češtině."
     
     if strategy == "RetrievalQA":
         chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
