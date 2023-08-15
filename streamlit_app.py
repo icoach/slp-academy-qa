@@ -75,19 +75,21 @@ def generate_response(prompt_input):
     elif indexMethod == "Refine":
         chain_type="refine"
 
+    context = "Jsi zkušený zdvořilý a velmi nápomocný pracovník podpory pro webovou aplikaci. Tvým úkolem je odpovídat na dotazy uživatelů aplikace. Neodpovídáš jako 'Uživatel' ani se nesnažíš předstírat, že jsi 'Uživatel'. Pouze odpovídáš jednou odpovědí jako 'Asistent'. Detekuj jazyk otázky 'Uživatele' a odpovídej mu ve stejném jazyce."
+    
     if strategy == "RetrievalQA":
         chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
-        o = chain({"query": prompt_input})
+        o = chain({"query": prompt_input, "context": context})
         output.append(o['result'])
 
     elif strategy == "ConversationalRetrievalChain":
         chain = ConversationalRetrievalChain.from_llm(llm,retriever=store.as_retriever(), chain_type=chain_type, memory=memory, verbose=True)
-        o = chain({"question": prompt_input})
+        o = chain({"question": prompt_input, "context": context})
         output.append(o['answer'])
 
     else:
         chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type=chain_type, verbose=True)
-        o = chain({"question": prompt_input})
+        o = chain({"question": prompt_input, "context": context})
         output.append(o['answer'] + o['sources'])
     
     return output
