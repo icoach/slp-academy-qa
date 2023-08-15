@@ -70,9 +70,7 @@ with st.sidebar:
     max_tokens = st.sidebar.slider('max_tokens', min_value=0.01, max_value=1.0, value=0.2, step=0.01)
     presence_penalty = st.sidebar.slider('max_tokens', min_value=0.0, max_value=1.0, value=0.0, step=0.1)
 
-    strategy = st.radio(
-    "Jakou použít strategii pro vyhledání obsahu",
-    ('RetrievalQAWithSourcesChain', 'RetrievalQA', 'Documentary'))
+    strategy = st.radio("Jakou použít strategii pro vyhledání obsahu", ('RetrievalQAWithSourcesChain', 'RetrievalQA'))
 
     st.markdown('📖 TODO: more infor how to use this prototype')
 
@@ -111,7 +109,7 @@ def generate_response(prompt_input):
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=temperature, max_tokens=max_tokens, model_kwargs={"presencePenalty": presence_penalty})
     
     if strategy == "RetrievalQA":
-        chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever()}
+        chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
         o = chain({"query": prompt_input})
     else:
         chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type="stuff", return_source_documents=True, verbose=True)
