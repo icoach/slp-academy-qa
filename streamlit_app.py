@@ -113,9 +113,9 @@ def generate_response(prompt_input):
     if strategy == "RetrievalQA":
         chain = RetrievalQA.from_chain_type(llm,retriever=store.as_retriever(), verbose=True)
         o = chain({"query": prompt_input})
-        output.append(o['result'] + o['sources'])
+        output.append(o['result'])
     else:
-        chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type="stuff", return_source_documents=True, verbose=True)
+        chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type="stuff", verbose=True)
         o = chain({"question": prompt_input})
         output.append(o['answer'] + o['sources'])
     
