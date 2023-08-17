@@ -9,6 +9,7 @@ from langchain.chat_models import ChatOpenAI
 
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
+from langchain.prompts.prompt import PromptTemplate
 
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
@@ -79,7 +80,7 @@ def generate_response(prompt_input):
     
     if strategy == "RetrievalQA":
         chain = RetrievalQA.from_llm(llm,retriever=store.as_retriever(), verbose=True)
-        o = chain({"query": prompt_input + " Odpovídej pouze v češtině."})
+        o = chain({"query": prompt_input})
         output.append(o['result'])
 
     elif strategy == "ConversationalRetrievalChain":
@@ -89,9 +90,13 @@ def generate_response(prompt_input):
 
     else:
         chain = RetrievalQAWithSourcesChain.from_llm(llm,retriever=store.as_retriever(), verbose=True)
-        # chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type=chain_type, verbose=True)
-        o = chain({"question": prompt_input + " Odpovídej pouze v češtině."})
-        output.append(o['answer'] + o['sources'])
+        document_prompt = PromptTemplate(input_variables=['page_content', 'source'], output_parser=None, partial_variables={}, template='Content: {page_content}\nSource: {source}', template_format='f-string', validate_template=True)
+        question_prompt = PromptTemplate(input_variables=['context', 'question'], output_parser=None, partial_variables={}, template='Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim. Use only provided document parts to formulate the answer.\n{context}\nQuestion: {question}\nRelevant text, if any:', template_format='f-string', validate_template=True)
+        combine_prompt = PromptTemplate(input_variables=['summaries', 'question'], output_parser=None, partial_variables={}, template='You are senior support specialist for solidpixels (the name is always lowecase and spelled together). Your task is to answer user\'s questions about solidpixels SaaS application functionality. Given the following extracted parts of a long document and a question, create a final answer with references ("SOURCES"). \nIf you don\'t know the answer, just say that you don\'t know. Don\'t try to make up an answer. Formulate the answer in Czech. \nALWAYS return a "SOURCES" part in your answer.\n\nQUESTION: {question}\n=========\n{summaries}\n=========\nFINAL ANSWER:', template_format='f-string', validate_template=True)
+
+        chain = RetrievalQAWithSourcesChain.from_llm(llm,document_prompt, question_prompt, combine_prompt, retriever=store.as_retriever())        # chain = RetrievalQAWithSourcesChain.from_chain_type(llm,retriever=store.as_retriever(), chain_type=chain_type, verbose=True)
+        o = chain({"question": prompt_input})
+        output.append(o['answer'] + "\n\n" + o['sources'])
     
     return output
 
